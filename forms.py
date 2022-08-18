@@ -1,8 +1,20 @@
 from datetime import datetime
-from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Optional
+from flask_wtf import Form, FlaskForm
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
+# , Regexp;  AnyOf, URL, Length, Regexp,
+import re
 
+
+def isValidPhone(number):
+    regex = re.compile('^([0-9]{3})-?([0-9]{3})-?([0-9]{4})$')
+    return regex.match(number)
+
+
+def isValidFacebook(url):
+
+    regex = re.compile('^(https?:\\/\\/)?(w{3}\\.facebook.com\\/.*)')
+    return regex.match(url)
 class ShowForm(Form):
     artist_id = StringField(
         'artist_id'
@@ -125,7 +137,24 @@ class VenueForm(Form):
     seeking_description = StringField(
         'seeking_description'
     )
+    def venue_validate(self):
+        """Define a custom validate method in your Form:"""
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
 
+        # if len(self.phone.data) < 10:
+        #     raise ValidationError('Invalid phone number.')
+
+        if not isValidPhone(self.phone.data):
+            self.phone.errors.append('Invalid phone.')
+            return False
+        if not self.facebook_link.data:
+            return True
+        if not isValidFacebook(self.facebook_link.data):
+            self.facebook_link.errors.append('Invalid facebook URL.')
+            return False
+        return True    
 
 
 class ArtistForm(Form):
@@ -236,4 +265,21 @@ class ArtistForm(Form):
     seeking_description = StringField(
             'seeking_description'
      )
+    def artist_validate(self):
+        """Define a custom validate method in your Form:"""
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
 
+        # if len(self.phone.data) < 10:
+        #     raise ValidationError('Invalid phone number.')
+
+        if not isValidPhone(self.phone.data):
+            self.phone.errors.append('Invalid phone.')
+            return False
+        if not self.facebook_link.data:
+            return True
+        if not isValidFacebook(self.facebook_link.data):
+            self.facebook_link.errors.append('Invalid facebook URL.')
+            return False
+        return True
