@@ -8,82 +8,33 @@ from flask import Flask, render_template, request, Response, flash, redirect, ur
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
+from models import app, db, Venue, Artist, Show
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 #----------------------------------------------------------------------------#
+from models import *
+from models import app, db, Venue, Artist, Show
 # App Config.
 #----------------------------------------------------------------------------#
-
 app = Flask(__name__)
-moment = Moment(app)
-app.config.from_object('config')
 db = SQLAlchemy(app)
 db.init_app(app)
-logging.basicConfig(filename='error.log', level=logging.INFO)
 migrate = Migrate(app, db)
+moment = Moment(app)
+app.config.from_object('config')
+db.init_app(app)
+logging.basicConfig(filename='error.log', level=logging.INFO)
 
 
- 
- 
-
-# TODO: connect to a local postgresql database
+# TODO(done): connect to a local postgresql database see config.py
 
 #----------------------------------------------------------------------------#
-# Models.
+# Models(done). see models.py
 #----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-    __tablename__ = 'venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String()))
-    facebook_link = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    website_link = db.Column(db.String())        
-    seeking_talent = db.Column(db.Boolean, nullable=True)
-    seeking_description = db.Column(db.String(500), nullable=True)
-    show_artist = db.relationship(
-        'Artist', secondary='show', back_populates='show_venue',
-        lazy='dynamic')
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-
-class Artist(db.Model):
-    __tablename__ = 'artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String))
-    facebook_link = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    website_link = db.Column(db.String())
-    seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
-    show_venue = db.relationship(
-        'Venue',
-        secondary='show',
-        back_populates='show_artist',
-        lazy='dynamic')
-
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-class Show(db.Model):
-    __tablename__ = 'show'
-    id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
-    venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'))
-    start_time = db.Column(db.DateTime, nullable=False)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
@@ -624,14 +575,13 @@ if not app.debug:
 #----------------------------------------------------------------------------#
 # Launch.
 #----------------------------------------------------------------------------#
-
+import os 
 # Default port:
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run()
 
 # Or specify port manually:
-'''
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-'''
