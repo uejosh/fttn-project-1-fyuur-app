@@ -6,18 +6,20 @@ import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for, abort
 from flask_moment import Moment
+from models import *
 from flask_sqlalchemy import SQLAlchemy
 import logging
-from models import app, db, Venue, Artist, Show
 from logging import Formatter, FileHandler
-from flask_wtf import Form
+from flask_wtf import FlaskForm  
 from forms import *
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask import current_app
 from flask_migrate import Migrate
+from config import *
+import sys
+from sqlalchemy import func
 #----------------------------------------------------------------------------#
-from models import *
-from models import app, db, Venue, Artist, Show
+
+
 # App Config.
 #----------------------------------------------------------------------------#
 app = Flask(__name__)
@@ -31,7 +33,7 @@ logging.basicConfig(filename='error.log', level=logging.INFO)
 
 
 # TODO(done): connect to a local postgresql database see config.py
-
+ 
 #----------------------------------------------------------------------------#
 # Models(done). see models.py
 #----------------------------------------------------------------------------#
@@ -66,8 +68,6 @@ def index():
 
 @ app.route('/venues')
 def venues():
-  # TODO: replace with real venues data.
-  #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
     data = []
     venue_list = Venue.query.order_by('city').all()
     location_genre = db.session.query(Venue).distinct(Venue.city).all()
@@ -89,9 +89,6 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for Hop should return "The Musical Hop".
-  # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
     research_input = request.form.get('search_term', '')
     search_venue = db.session.query(Venue).filter(Venue.name.ilike(
         '%{}%'.format(research_input))).all()
@@ -172,10 +169,17 @@ def show_venue(venue_id):
 #  Create Venue
 #  ----------------------------------------------------------------
 
+#@app.route('/venues/create', methods=['GET'])
+#def create_venue_form():
+#  form = VenueForm()
+#  return render_template('forms/new_venue.html', form=form)
+
+
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
   form = VenueForm()
-  return render_template('forms/new_venue.html', form=form)
+  form.validate_on_submit()
+  return render_template('forms/new_venue.html', form=form)  
 
 @ app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
@@ -227,7 +231,9 @@ def create_venue_submission():
         # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
-        
+
+
+
 @app.route('/venues/<int:venue_id>/delete', methods=['DELETE'])
 def delete_venue(venue_id):
 # TODO: Complete this endpoint for taking a venue_id, and using

@@ -1,26 +1,27 @@
 from datetime import datetime
-from wtforms.validators import DataRequired, AnyOf, URL, Optional
+from wtforms.validators import DataRequired, AnyOf, URL, InputRequired, Regexp, ValidationError
 from flask_wtf import Form, FlaskForm
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
+from wtforms import StringField, SelectField, IntegerField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
 # , Regexp;  AnyOf, URL, Length, Regexp,
 import re
-
 
 def isValidPhone(number):
     regex = re.compile('^([0-9]{3})-?([0-9]{3})-?([0-9]{4})$')
     return regex.match(number)
 
-
 def isValidFacebook(url):
 
     regex = re.compile('^(https?:\\/\\/)?(w{3}\\.facebook.com\\/.*)')
     return regex.match(url)
-class ShowForm(Form):
-    artist_id = StringField(
-        'artist_id'
+
+ 
+
+class ShowForm(FlaskForm):
+    artist_id = IntegerField(
+        'artist_id', validators=[InputRequired()]
     )
     venue_id = StringField(
-        'venue_id'
+        'venue_id', validators=[InputRequired()]
     )
     start_time = DateTimeField(
         'start_time',
@@ -28,15 +29,16 @@ class ShowForm(Form):
         default= datetime.today()
     )
 
-class VenueForm(Form):
+class VenueForm(FlaskForm):
+
     name = StringField(
-        'name', validators=[DataRequired()]
+        'name', validators=[DataRequired("Please enter a name")]
     )
     city = StringField(
-        'city', validators=[DataRequired()]
+        'city', validators=[DataRequired("Please enter a city.")]
     )
     state = SelectField(
-        'state', validators=[DataRequired()],
+        'state', validators=[DataRequired("Please enter a state.")],
         choices=[
             ('AL', 'AL'),
             ('AK', 'AK'),
@@ -92,17 +94,17 @@ class VenueForm(Form):
         ]
     )
     address = StringField(
-        'address', validators=[DataRequired()]
+        'address', validators=[DataRequired("Please enter address")]
     )
     phone = StringField(
-        'phone', validators=[DataRequired()])
-    
+        'phone',validators=[DataRequired()]
+    )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[URL()]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'genres', validators=[InputRequired("Please enter venue genres.")],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -129,7 +131,7 @@ class VenueForm(Form):
         'facebook_link', validators=[URL()]
     )
     website_link = StringField(
-        'website_link'
+        'website_link' , validators=[URL()]
     )
 
     seeking_talent = BooleanField( 'seeking_talent' )
@@ -143,9 +145,6 @@ class VenueForm(Form):
         if not rv:
             return False
 
-        # if len(self.phone.data) < 10:
-        #     raise ValidationError('Invalid phone number.')
-
         if not isValidPhone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
@@ -154,10 +153,10 @@ class VenueForm(Form):
         if not isValidFacebook(self.facebook_link.data):
             self.facebook_link.errors.append('Invalid facebook URL.')
             return False
-        return True    
+        return True
 
-
-class ArtistForm(Form):
+class ArtistForm(FlaskForm):
+        
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -221,10 +220,10 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        'phone', validators=[DataRequired()])
-        
+        'phone',validators=[DataRequired()]
+    )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[URL()]
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
@@ -256,7 +255,7 @@ class ArtistForm(Form):
      )
 
     website_link = StringField(
-        'website_link'
+        'website_link', validators=[URL()]
      )
 
     seeking_venue = BooleanField( 'seeking_venue' )
@@ -270,9 +269,6 @@ class ArtistForm(Form):
         if not rv:
             return False
 
-        # if len(self.phone.data) < 10:
-        #     raise ValidationError('Invalid phone number.')
-
         if not isValidPhone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
@@ -281,4 +277,4 @@ class ArtistForm(Form):
         if not isValidFacebook(self.facebook_link.data):
             self.facebook_link.errors.append('Invalid facebook URL.')
             return False
-        return True
+        return True   

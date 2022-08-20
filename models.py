@@ -5,12 +5,12 @@
 #----------------------------------------------------------------------------#
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from datetime import datetime
+
 
 app = Flask(__name__)
-db = SQLAlchemy(app, session_options={"expire_on_commit": False})
+db = SQLAlchemy(app)
 # TODO: connect to a local postgresql database
-migrate = Migrate(app, db)
 
 
 #----------------------------------------------------------------------------#
@@ -58,14 +58,18 @@ class Artist(db.Model):
         secondary='show',
         back_populates='show_artist',
         lazy='dynamic')
-
+    def __rep__(self):
+      return '<Artist {}>'.format(self.name)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 class Show(db.Model):
     __tablename__ = 'show'
     id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
-    venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'))
+    artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
+
+    def __rep__(self):
+      return '<Show {}{}>'.format(self.artist_id, self.venue_id)    
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
