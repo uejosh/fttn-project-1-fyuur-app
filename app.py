@@ -6,7 +6,8 @@ import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for, abort
 from flask_moment import Moment
-from models import *
+# from models import *
+from models import db, Venue, Show, Artist
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
@@ -18,18 +19,19 @@ from config import *
 import sys
 from sqlalchemy import func
 #----------------------------------------------------------------------------#
-
-
 # App Config.
 #----------------------------------------------------------------------------#
 app = Flask(__name__)
-db = SQLAlchemy(app)
-db.init_app(app)
-migrate = Migrate(app, db)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://joshman:@localhost:5432/fyyr'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 moment = Moment(app)
 app.config.from_object('config')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+db = SQLAlchemy(app)
 logging.basicConfig(filename='error.log', level=logging.INFO)
+
+migrate = Migrate(app, db)
 
 
 # TODO(done): connect to a local postgresql database see config.py
